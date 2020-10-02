@@ -33,7 +33,7 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         Gate::define('delete-post', function ($user, Post $post) {
-            return $user->role == 'moderator' || $user->id == $post->user_id;
+            return $user->role == 'moderator';
         });
 
 //        Gate::define('delete-comment', function ($user, Post $post) {

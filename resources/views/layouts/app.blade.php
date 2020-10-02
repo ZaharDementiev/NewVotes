@@ -11,11 +11,13 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @if(Route::current() && Route::current()->getName() == 'live')
-        <title>Lady Secrets - лента женских секретов, советов, вопросов и ответов | Онлайн общение, анонимные
-            публикации</title>
-        <meta name="description"
-              content="Общение женщин: ответы на вопросы, истории из жизни, советы, обсуждения и много другое на Lady Secrets. Сайт для женщин, публикация анонимных историй и обсуждение проблем.">
-
+        <title>Флирт - лента сексуальных предпочтений, желаний, фантазий, откровений и секретов</title>
+        <meta name="description" content="На сайте FlirtVirt вы можете написать о своих сексуальных фантазиях и желаниях, обсудить откровенные истории, поделиться интимными секретами.">
+        <meta name="keywords" content="сексуальные желания женщин, сексуальные фантазии девушек, интимные женские секреты">
+    @elseif(Route::current() && Route::current()->getName() == 'virt')
+        <title>Вирт - онлайн поиск девушек для виртуального секса</title>
+        <meta name="description" content="На сайте FlirtVirt вы можете найти девушку по рейтингу для вирта. Интимные переписки, голосовые сообщения, видеозвонки, обмен фото и видео.">
+        <meta name="keywords" content="вирт, вирт секс, вирт по ватсап, вирт по вайберу, вирт телеграмм, вирт скайп">
     @elseif(Route::current() && Route::current()->getName() == 'discussed')
         <title>Обсуждаемые публикации женщин на Lady Secrets</title>
         <meta name="description" content="Самые обсуждаемые женские темы на Lady Secrets.">
@@ -250,7 +252,6 @@
                                         <div class="icon_li main"></div>
                                         <span>Флирт</span>
                                     </a></li>
-                                @auth
                                     <li class="{{ (request()->is('*virt*')) ? 'active' : '' }} mobShow tape">
                                         <a href="{{ route('virt') }}">
                                             <div class="icon_li tape">
@@ -261,16 +262,6 @@
                                             <span>Вирт</span>
                                         </a>
                                     </li>
-                                @endauth
-                                @guest
-                                    <li class="{{ (request()->is('*virt*')) ? 'active' : ''}} mobShow tape">
-                                        <a href="{{ route('virt') }}" onclick="preventDefault() " class="signIn_open">
-                                            <div class="icon_li tape">
-                                            </div>
-                                            <span>Вирт</span>
-                                        </a>
-                                    </li>
-                                @endguest
                                 {{--                            @auth--}}
                                 {{--                                <li class="{{ (request()->is('*my*')) ? 'active' : '' }} mobShow tape">--}}
                                 {{--                                    <a href="{{ route('my-tags') }}">--}}
@@ -437,7 +428,9 @@
                             </li>
                         </ul>
 
-                        <p class="foot-info-site">© 2020 virtsecrets.com</p>
+                        <p class="foot-info-site">© 2020 flirtvirt.com - сайт поиска девушек для вирта.
+                            <br><br>Контакты: info@flirtvirt.com</p>
+
                     </div>
                 </div>
 
@@ -806,56 +799,6 @@
     @endif
 @endguest
 
-<div class="wrap-pop-up popUp" id="modal-review">
-    <div class="pop-up-body popUp__body popUp__body_settings">
-        <div class="popUp__message">
-            <div class="close close-window"></div>
-            <div class="popUp__content">
-                <form id="form-feedback" method="post">
-                    @csrf
-                    <div class="block-title block-title_margin">
-                        <div class="block-title__title title_small">Оценить</div>
-                        <div class="rating rating_left rating_action">
-                            <div class="rating__el rating-el"></div>
-                            <div class="rating__el rating-el"></div>
-                            <div class="rating__el rating-el"></div>
-                            <div class="rating__el rating-el"></div>
-                            <div class="rating__el rating-el"></div>
-                            <input type="hidden" name="points" class="rating_action__inp" value="">
-                        </div>
-                    </div>
-
-                    <div class="block-title block-title_margin">
-                        <div class="block-title__title title_small">Оставить отзыв:</div>
-                        <div class="wrap-radio">
-                            <label class="wrap-radio__el radio-el">
-                  <span class="radio-el__inp radio">
-                    <input type="radio" name="positive" class="radio__inp" value="1">
-                    <span class="radio__dec">
-                      <span class="radio__dec-circle"></span>
-                    </span>
-                  </span>
-                                <span class="radio-el__text">Положительно</span>
-                            </label>
-                            <label class="wrap-radio__el radio-el">
-                  <span class="radio-el__inp radio">
-                    <input type="radio" name="positive" class="radio__inp" value="0">
-                    <span class="radio__dec">
-                      <span class="radio__dec-circle"></span>
-                    </span>
-                  </span>
-                                <span class="radio-el__text">Отрицательно</span>
-                            </label>
-                        </div>
-                        <textarea name="text" class="textarea block-title__textarea" maxlength="280"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn_big">Сохранить</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
 @auth
     <div class="wrap-pop-up popUp" id="modal-settings">
         <div class="pop-up-body popUp__body popUp__body_settings">
@@ -877,7 +820,7 @@
                         <div class="settings-content-el-body">
                             <form class="form-settigns-el" method="post" action="{{route('save-about')}}">
                                 @csrf
-                                <textarea class="textarea about_textarea" maxlength="280">@if(auth()->user()->about != null){{auth()->user()->about}}@endif</textarea>
+                                <textarea class="textarea about_textarea" name="about_user" maxlength="280">@if(auth()->user()->about != null){{auth()->user()->about}}@endif</textarea>
                                 <div class="btn-green">
                                     <button type="submit">Сохранить</button>
                                 </div>
@@ -1120,6 +1063,55 @@
     </div>
 @endauth
 
+<div class="wrap-pop-up popUp" id="modal-review">
+    <div class="pop-up-body popUp__body popUp__body_settings">
+        <div class="popUp__message">
+            <div class="close close-window"></div>
+            <div class="popUp__content">
+                <form method="post" id="form-feedback">
+                    @csrf
+                    <div class="block-title block-title_margin">
+                        <div class="block-title__title title_small">Оценить</div>
+                        <div class="rating rating_left rating_action">
+                            <div class="rating__el rating-el rating-el_active"></div>
+                            <div class="rating__el rating-el"></div>
+                            <div class="rating__el rating-el"></div>
+                            <div class="rating__el rating-el"></div>
+                            <div class="rating__el rating-el"></div>
+                            <input type="hidden" name="rating" class="rating_action__inp" value="1">
+                        </div>
+                    </div>
+                    <div class="block-title block-title_margin">
+                        <div class="block-title__title title_small">Оставить отзыв:</div>
+                        <div class="wrap-radio">
+                            <label class="wrap-radio__el radio-el">
+                              <span class="radio-el__inp radio">
+                                <input type="radio" checked name="think" value="1" class="radio__inp">
+                                <span class="radio__dec">
+                                  <span class="radio__dec-circle"></span>
+                                </span>
+                              </span>
+                                <span class="radio-el__text">Положительно</span>
+                            </label>
+                            <label class="wrap-radio__el radio-el">
+                              <span class="radio-el__inp radio">
+                                <input type="radio" name="think" value="0" class="radio__inp">
+                                <span class="radio__dec">
+                                  <span class="radio__dec-circle"></span>
+                                </span>
+                              </span>
+                                <span class="radio-el__text">Отрицательно</span>
+                            </label>
+                        </div>
+                        <textarea class="textarea block-title__textarea feedback_field" name="text" maxlength="280"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn_big">Сохранить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @yield('scripts')
 
 <script src="/js/jquery.fancybox.min.js"></script>
@@ -1210,7 +1202,7 @@
 <script>
     function openFeedbackForm(id) {
         let form = $('#form-feedback');
-        let url = '/feedbacks/submit/' + id;
+        let url = '/feedbacks/save/' + id;
         form.attr('action', url);
     }
 </script>

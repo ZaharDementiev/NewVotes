@@ -7479,3 +7479,19 @@ section.sec-profile .write-message {
   background-color: #ffffff;
   padding: 20px 20px;
 }
+.non-auth-opening {
+  display: none !important;
+}
+
+.feedback_field {
+  resize: none;
+  box-shadow: none !important;
+  background: #fff !important;
+  display: block;
+  width: 100%;
+  height: 142px;
+  border-radius: 25px;
+  border: solid 2px #f8e9e6;
+  background-color: #ffffff;
+  padding: 20px 20px;
+}

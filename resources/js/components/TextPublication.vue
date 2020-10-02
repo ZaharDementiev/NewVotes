@@ -73,9 +73,12 @@
 <!--                            </div>-->
 <!--                        </div>-->
                         <div class="publication-content-form-bottom" style="margin-bottom: 20px">
-                            <div class="publication-content-form-btn btn-green">
-                                <button @click.prevent="sendForm" v-show="publish" type="submit">Опубликовать</button>
-                            </div>
+                          <div v-if="user.vip" class="publication-content-form-btn btn-green" >
+                              <button @click.prevent="sendForm" v-show="publish" type="submit" >Опубликовать</button>
+                          </div>
+                          <div v-else="!user.vip" >
+                              <p>Лимит исчерпан</p>
+                          </div>
                         </div>
                     </form>
                 </div>
@@ -89,7 +92,7 @@
 <script>
     export default {
         name: "TextPublication",
-        props: ['tags'],
+        props: ['tags', 'user'],
 
         data() {
             return {

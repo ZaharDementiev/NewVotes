@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Closure;
 
@@ -15,6 +17,14 @@ class LastOnlineAt
 
         if (auth()->user()->last_online_at->diffInMinutes(now()) !== 0)
         {
+            if (auth()->user()->gender == User::GENDER_FEMALE && auth()->user()->last_online_at
+                < Carbon::now()->startOfDay()) {
+                if (auth()->user()->vip)
+                    auth()->user()->rating += 2;
+                else
+                    auth()->user()->rating++;
+                auth()->user()->save();
+            }
             DB::table("users")
                 ->where("id", auth()->user()->id)
                 ->update(["last_online_at" => now()]);

@@ -162,7 +162,7 @@ Route::get('{name}/followers', 'UserController@followers')->name('profile-follow
 Route::post('{name}/followers', 'UserController@followers')->name('profile-followers')->middleware('auth');
 //--Zahar start--//
 Route::get('{name}/feedbacks', 'UserController@feedbacks')->name('profile-feedbacks')->middleware('auth');
-Route::get('{name}/transactions', 'UserController@transactions')->name('profile-transactions')->middleware('auth');
+//Route::get('{name}/transactions', 'UserController@transactions')->name('profile-transactions')->middleware('auth');
 //--Zahar end--//
 });
 
@@ -177,15 +177,20 @@ Route::post('/users/follow', 'UserController@follow');
 Route::post('/users/unfollow', 'UserController@unfollow');
 
 //--Zahar start--//
-Route::get('feedback/{transaction}', 'FeedbackController@index')->name('feedback')->middleware('auth');
-Route::post('feedbacks/submit/{transaction}', 'FeedbackController@store')->name('feedback-submit')->middleware('auth');
+//Route::get('feedback/{transaction}', 'FeedbackController@index')->name('feedback')->middleware('auth');
+//Route::post('feedbacks/submit/{transaction}', 'FeedbackController@store')->name('feedback-submit')->middleware('auth');
 Route::get('/transaction', 'TransactionController@transaction')->name('transaction')->middleware('auth');
 Route::post('transaction/submit', 'TransactionController@make')->name('transaction-submit')->middleware('auth');
 
-Route::get('virt', 'HomeController@virts')->name('virt')->middleware('auth');
+Route::get('virt', 'HomeController@virts')->name('virt');
 Route::post('virt/search', 'HomeController@sort')->name('virt-search');
 Route::post('save/about', 'UserController@saveAbout')->name('save-about');
 Route::post('save/link', 'UserController@saveLink')->name('save-link');
 Route::post('save/contacts', 'UserController@saveContacts')->name('save-contacts');
 Route::post('save/services', 'UserController@saveServices')->name('save-services');
 Route::post('save/tags', 'UserController@saveTags')->name('save-tags');
+Route::post('feedbacks/save/{id}', 'FeedbackController@store')->name('save-feedback');
+Route::post('/virt/load', "HomeController@loadVirts")->name('virt-load');
+Route::post('/feedback/load/{user}', "FeedbackController@loadFeedbacks")->name('feedback-load');
+
+Route::any('/logout', 'Auth\LoginController@logout');

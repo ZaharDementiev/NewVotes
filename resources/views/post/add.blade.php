@@ -9,7 +9,7 @@
 
 
 
-            <text-publication :tags="{{$tags}}"></text-publication>
+            <text-publication :tags="{{$tags}}" :user="{{auth()->user()}}"></text-publication>
 
 
 {{--    </div>--}}

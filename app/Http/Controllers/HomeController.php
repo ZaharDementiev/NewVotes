@@ -162,14 +162,34 @@ class HomeController extends Controller
     {
         if (auth()->check())
             $women = User::where('gender', User::GENDER_FEMALE)->where('id', '!=', auth()->id())
-                ->orderBy('vip', 'DESC')
-                ->orderBy('rating', 'DESC')->get();
+                ->orderBy('vip_until', 'DESC')
+                ->orderBy('rating', 'DESC')->limit(8)->get();
         else
-            $women = User::where('gender', User::GENDER_FEMALE)->orderBy('vip', 'DESC')
-                ->orderBy('rating', 'DESC')->get();
+            $women = User::where('gender', User::GENDER_FEMALE)->orderBy('vip_until', 'DESC')
+                ->orderBy('rating', 'DESC')->limit(8)->get();
         return view('virt', [
             'women' => $women
         ]);
+    }
+
+    public function loadVirts(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (auth()->check())
+            $women = User::where('gender', User::GENDER_FEMALE)->where('id', '!=', auth()->id())
+                ->orderBy('vip_until', 'DESC')
+                ->orderBy('rating', 'DESC')
+                ->whereNotIn('id', $ids)
+                ->limit(8)
+                ->get();
+        else
+            $women = User::where('gender', User::GENDER_FEMALE)
+                ->orderBy('vip_until', 'DESC')
+                ->whereNotIn('id', $ids)
+                ->orderBy('rating', 'DESC')
+                ->limit(8)
+                ->get();
+        return response()->json($women, 200);
     }
 
     public function sort(Request $request)
@@ -201,7 +221,7 @@ class HomeController extends Controller
 //        whereDoesntHave('tags', function (Builder $query) use ($tags) {
 //            $query->whereNotIn('tags.id', $tags);
 //        })
-        
+
         $women = $sql->orderBy('vip', 'DESC')->orderBy('rating', 'DESC')->get();
 
         return response()->json($women, 200);

@@ -13,37 +13,39 @@ class FeedbackController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+//        $this->middleware('auth');
     }
 
-    public function store(Request $request, Transaction $transaction)
+    public function store(Request $request, $id)
     {
-        if (auth()->user()->gender == User::GENDER_MALE)
-        {
-            $feedback = new Feedback();
-            $feedback->user_id = Auth::id();
-            $feedback->text = $request->input('text');
-            $feedback->points = $request->input('points');
-            $feedback->positive = $request->input('positive');
+        $feedback = new Feedback();
+        $feedback->user_id = auth()->user()->id;
+        $feedback->text = $request->input('text');
 
-            if ($feedback->positive)
-                $transaction->receiver->rating += 2;
-            else
-                $transaction->receiver->rating -= 2;
-            $transaction->receiver->save();
+        $feedback->points = $request->input('rating');
+        $feedback->positive = $request->input('think');
+        $feedback->to_id = $id;
 
-            $feedback->payment_id = $transaction->id;
-            $feedback->to_id = $transaction->to_id;
-            $feedback->save();
+        $user = User::find($id);
+        if ($feedback->positive) {
+            $user->rating += 10;
+        } else {
+            $user->rating -= 10;
         }
+        $user->save();
+        $feedback->save();
+
         return redirect()->back();
     }
 
-    public function index(Transaction $transaction)
+    public function loadFeedbacks(Request $request, User $user)
     {
-        return view('user-parts.makeFeedback', [
-            'transaction' => $transaction
-        ]);
+        $feedbacks = $user->feedbacks()
+            ->whereNotIn('id', $request->input('ids'))
+            ->orderBy('id', 'DESC')
+            ->limit(10)
+            ->get();
+        return response()->json($feedbacks, 200);
     }
 }
 

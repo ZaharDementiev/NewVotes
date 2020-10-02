@@ -7,6 +7,7 @@ use App\User;
 use App\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Auth;
@@ -57,9 +58,14 @@ class UserController extends Controller
             Storage::disk('local')->put('public/images/avatars' . '/' . $fileName, $img, 'public');
 
 
+            if ($user->gender == User::GENDER_FEMALE && $user->avatar == 'default.jpg') {
+                if ($user->vip)
+                    $user->rating += 20;
+                else
+                    $user->rating += 10;
+            }
             $user->avatar = $fileName;
             $user->save();
-
         }
 
         return redirect()->route('profile', Auth::user()->name);
@@ -78,6 +84,10 @@ class UserController extends Controller
             abort(403);
         }
 
+        $user = User::find($request->post('users_id'));
+        $user->rating += 1;
+        $user->save();
+
         Auth::user()->follow($request->post('users_id'), User::class);
         echo 'unfollow';
     }
@@ -87,6 +97,10 @@ class UserController extends Controller
         if (!$request->ajax()) {
             abort(403);
         }
+
+        $user = User::find($request->post('users_id'));
+        $user->rating -= 1;
+        $user->save();
 
         Auth::user()->unfollow($request->post('users_id'), User::class);
         echo 'follow';
@@ -266,10 +280,10 @@ class UserController extends Controller
 
     public function feedbacks($name)
     {
-        $user = User::with('feedbacks')->where('name', $name)->first();
-        return view('user-parts.feedback', [
-            'user' => $user
-        ]);
+        $user = User::with('feedbacks')->withCount('posts', 'followings', 'followers')
+            ->where('name', $name)->first();
+        $feedbacks = $user->feedbacks()->orderBy('id', 'DESC')->limit(10)->get();
+        return view('user-parts.feedbacks', compact('user', 'feedbacks'));
     }
 
     public function transactions($name)
@@ -288,6 +302,19 @@ class UserController extends Controller
     public function saveAbout(Request $request)
     {
         $user = auth()->user();
+        if (!$user->field_filled && count($user->tags) > 0 && $user->services != null
+            && $request->input('about_user') != null) {
+            if  ($user->vip) {
+                $user->rating += 20;
+            } else {
+                $user->rating += 10;
+            }
+            $user->field_filled = true;
+        }
+        if ($user->about != null && $request->input('about_user') == null) {
+            $user->rating -= 10;
+            $user->field_filled = false;
+        }
         $user->about = $request->input('about_user');
         $user->save();
         return response()->json(['success' => true], 200);
@@ -319,6 +346,19 @@ class UserController extends Controller
     public function saveServices(Request $request)
     {
         $user = auth()->user();
+        if (!$user->field_filled && count($user->tags) > 0 && $user->about != null
+            && $request->input('service') != null) {
+            if  ($user->vip) {
+                $user->rating += 20;
+            } else {
+                $user->rating += 10;
+            }
+            $user->field_filled = true;
+        }
+        if ($user->services != null && $request->input('service') == null) {
+            $user->rating -= 10;
+            $user->field_filled = false;
+        }
         $user->services = $request->input('service');
         $user->save();
         return response()->json(['success' => true], 200);
@@ -328,6 +368,20 @@ class UserController extends Controller
     {
         $user = auth()->user();
         $user->tags()->attach($request->input('tags'));
+
+        if (!$user->field_filled && count($user->tags) > 0 && $user->about != null
+            && $user->services != null) {
+            if  ($user->vip) {
+                $user->rating += 20;
+            } else {
+                $user->rating += 10;
+            }
+            $user->field_filled = true;
+        }
+        if (count($user->tags) == 0) {
+            $user->rating -= 10;
+            $user->field_filled = false;
+        }
         return response()->json(['success' => true], 200);
     }
 }

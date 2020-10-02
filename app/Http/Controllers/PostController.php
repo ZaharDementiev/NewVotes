@@ -38,7 +38,7 @@ class PostController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth')->except(['live', 'popular', 'discussed']);
+        $this->middleware('auth')->except(['live', 'popular', 'discussed', 'show']);
         Carbon::setLocale('ru');
         define('LIMIT_OF_POSTS', 10);
     }
@@ -78,7 +78,7 @@ class PostController extends Controller
             $last_modified = $posts->first() ? $posts->first()->updated_at->toDateTimeString() : null;
             return response()
                 ->view('post.index', compact('posts', 'filter', 'time'));
-            } else {
+        } else {
             return $posts;
         }
     }
@@ -88,11 +88,13 @@ class PostController extends Controller
         $filter = 'popular';
         return $this->all($request, $filter, $time);
     }
+
     public function discussed(Request $request, $time = 'day')
     {
         $filter = 'discussed';
         return $this->all($request, $filter, $time);
     }
+
     public function live(Request $request, $time = 'day')
     {
         $filter = 'live';
@@ -126,7 +128,7 @@ class PostController extends Controller
             $last_modified = $posts->first() ? $posts->first()->updated_at : null;
 
             return response()
-                    ->view('post.favorites', ['posts' => $posts])
+                ->view('post.favorites', ['posts' => $posts])
                 ->header('Last-Modified: ' . $last_modified, true, 304);
         } else {
             return $posts;
@@ -163,7 +165,7 @@ class PostController extends Controller
         $post->title = $request->post('title');
         if (preg_match('~(http*(\.com)|(\.ru)|(\.ua)|(\.org))|(.*(\.com)|(\.org)|(\.ru)|(\.ua))~',
             $request->post('description'))
-            ) {
+        ) {
             $post->approved = false;
         }
         $post->description = $this->nofollow($request->post('description'));
@@ -183,16 +185,19 @@ class PostController extends Controller
         $post->save();
         $post->slug = Str::slug($post->title . '-' . $post->id);
 
+
+        $post->approved = false;
+
         $post->save();
 
         $post->tags()->sync($tags);
         $tags = Tag::whereIn('id', $tags)->get();
         $tags_followers = [];
 
-        foreach($tags as $tag) {
-            $tags_followers = array_merge($tags_followers, $tag->followers()->where('id' ,'>' ,0)->pluck('id')->toArray());
+        foreach ($tags as $tag) {
+            $tags_followers = array_merge($tags_followers, $tag->followers()->where('id', '>', 0)->pluck('id')->toArray());
         }
-        $result = array_merge($tags_followers, Auth::user()->followers()->where('id' ,'>' ,0)->pluck('id')->toArray());
+        $result = array_merge($tags_followers, Auth::user()->followers()->where('id', '>', 0)->pluck('id')->toArray());
         $result = array_unique($result);
 
         if (($key = array_search(Auth::id(), $result)) !== false) {
@@ -204,7 +209,7 @@ class PostController extends Controller
         if ($request->has('files')) {
 
             $images = $request->files->all()['files'];
-            $i=1;
+            $i = 1;
             foreach ($images as $image) {
                 $fileName = $i . time() . '.' . $image->getClientOriginalExtension();
                 $destination_path = 'public/images/posts';
@@ -318,12 +323,12 @@ class PostController extends Controller
         }
 
         return response()
-        ->view('post.show', [
-            'post' => $post, 'tags' => $post->tags,
-            'images' => $post->images, 'user' => $post->user,
-            'options' => $post->options()->get(),
-            'comments' => $comments
-        ]);
+            ->view('post.show', [
+                'post' => $post, 'tags' => $post->tags,
+                'images' => $post->images, 'user' => $post->user,
+                'options' => $post->options()->get(),
+                'comments' => $comments
+            ]);
     }
 
     /**
@@ -399,7 +404,6 @@ class PostController extends Controller
         Post::destroy($post_id);
         return redirect()->route('live');
     }
-
 
 
     public function getOptions($post_id)
@@ -550,10 +554,10 @@ class PostController extends Controller
 
     public static function nofollow($data, $skip = null)
     {
-        $d= preg_replace_callback('~href=(["\'])([a-z0-9]++://(?![a-z0-9\.]*?lsecrets\.ru).*?)\1~', function ($matches) {
+        $d = preg_replace_callback('~href=(["\'])([a-z0-9]++://(?![a-z0-9\.]*?lsecrets\.ru).*?)\1~', function ($matches) {
             return "$matches[0] rel='nofollow'";
         }, $data);
-        $result= preg_replace_callback('~<a\s.*?href=\"(?!.*?lsecrets)([^\"]*)\"\s.*?>(.*)<\/a>~', function ($matches) {
+        $result = preg_replace_callback('~<a\s.*?href=\"(?!.*?lsecrets)([^\"]*)\"\s.*?>(.*)<\/a>~', function ($matches) {
             return "<noindex>$matches[0]</noindex>>";
         }, $d);
 
@@ -574,6 +578,22 @@ class PostController extends Controller
 
     public function approve(Post $post)
     {
+        $user = Auth::user();
+        if ($user->gender == User::GENDER_FEMALE) {
+            if ($user->posts()->count() == 0) {
+                if ($user->vip)
+                    $user->rating += 20;
+                else
+                    $user->rating += 10;
+            } else {
+                if ($user->vip)
+                    $user->rating += 2;
+                else
+                    $user->rating += 1;
+            }
+        }
+        $user->save();
+
         $post->approved = true;
         $post->save();
 

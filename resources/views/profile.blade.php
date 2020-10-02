@@ -76,18 +76,12 @@
                             </div>
                         @elseif(auth()->user()->gender == \App\User::GENDER_FEMALE && $user->gender == \App\User::GENDER_MALE)
                             <div class="profile_user_btn @if(Auth::user()->isFollowing($user))btn-green unscribe @else  subscribe @endif">
-                                <a>@if(Auth::user()->isFollowing($user)) Убрать из избранных @else Добавить в избранное @endif</a>
+                                @if($user->vip)
+                                    <a>@if(Auth::user()->isFollowing($user)) Убрать из избранных @else Добавить в избранное @endif</a>
+                                @endif
                             </div>
                         @endif
                     </div>
-{{--                    <div onclick="ajaxAction($(this), 'users')" class="unfollow"--}}
-{{--                         @if(!(Auth::user()->isFollowing($user))) hidden @endif--}}
-{{--                         data-id="{{ $user->id }}">--}}
-
-{{--                    <div class="profile_user_btn unscribe btn-green">--}}
-{{--                        <a>Отписаться</a>--}}
-{{--                    </div>--}}
-{{--                    </div>--}}
                     <div class="btn-green write-message">
                         <a href="{{route('chat', $user->name)}}">Написать сообщение</a>
                     </div>
@@ -97,29 +91,34 @@
                             @if ($user->name == auth()->user()->name && auth()->user()->gender == \App\User::GENDER_FEMALE)
                                 <div class="profile-descrp__icon"></div>
                             @endif
-                            <div class="profile-descrp__block">
-                                <div class="profile-descrp__title title title_small">О себе</div>
-                                <p class="profile-descrp__text">{{$user->about}}</p>
-                            </div>
+                            @if($user->gender == \App\User::GENDER_FEMALE && $user->about != null)
+                                <div class="profile-descrp__block">
+                                    <div class="profile-descrp__title title title_small">О себе</div>
+                                    <p class="profile-descrp__text">{{$user->about}}</p>
+                                </div>
+                            @endif
                             @if($user->vip)
                                 <div class="profile-descrp__block">
                                     <a href="{{$user->link}}" class="link-big">{{$user->link}}</a>
                                 </div>
                             @endif
                         <div class="profile-descrp__block">
-                            <div class="profile-descrp__title title title_small">Вирт общение:</div>
-                            <ul class="profile-descrp-ul profile-descrp__descrp">
-                                @if($user->gender == \App\User::GENDER_FEMALE)
+                            @if($user->gender == \App\User::GENDER_FEMALE && $user->services != null)
+                                <div class="profile-descrp__title title title_small">Вирт общение:</div>
+                                <ul class="profile-descrp-ul profile-descrp__descrp">
                                     @php $services = $user->services @endphp
                                     @foreach($services as $service)
                                         <li class="profile-descrp__text"><span>-</span>{{$service}}</li>
                                     @endforeach
-                                @endif
-                            </ul>
+                                </ul>
+                            @endif
                         </div>
                         <div class="profile-descrp__block">
-                            <div class="profile-descrp__title title title_small">Контакты:</div>
-                            <div class="block-contacts profile-descrp__contacts">
+                            @if($user->gender == \App\User::GENDER_FEMALE && ($user->whatsapp != null
+                            || $user->viber != null || $user->telegram != null || $user->skype != null))
+                                <div class="profile-descrp__title title title_small">Контакты:</div>
+                                <div class="block-contacts profile-descrp__contacts">
+                            @endif
                                 @if($user->whatsapp != null)
                                     <div class="block-contacts__el contacts-el">
                                         <img src="/img/icons/whatsapp.svg" alt="" class="contacts-el__icon">
@@ -184,10 +183,11 @@
                     </li>
                     @if($user->gender == \App\User::GENDER_FEMALE)
                         @if($user->vip)
-                            <li>
-                                <a href="profile-followers.html">
+                            <li class="{{ (request()->is("*user/*/feedbacks")) ? 'active' : '' }}">
+                                <a href="{{ route('profile-feedbacks', $user->name) }}">
                                     <h5>Отзывы</h5>
-                                    <span>12 | <span class="text-red">1</span></span>
+                                    <span>{{(\App\Feedback::where('positive', '1')->where('to_id', $user->id))->count()}} |
+                                        <span class="text-red">{{(\App\Feedback::where('positive', '0')->where('to_id', $user->id))->count()}}</span></span>
                                 </a>
                             </li>
                         @else

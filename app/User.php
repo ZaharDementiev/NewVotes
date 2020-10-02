@@ -23,6 +23,8 @@ class User extends Authenticatable
 
     public const GENDER_MALE = 1;
     public const GENDER_FEMALE = 0;
+    public const VIP_FEEDBACKS_COUNT = 5;
+    public const NON_VIP_FEEDBACKS_COUNT = 1;
 
     public static $BRONZE_MIN_AMOUNT = 1;
     public static $SILVER_MIN_AMOUNT = 1001;
@@ -39,7 +41,7 @@ class User extends Authenticatable
 
     public const STATUSES = ['ENTRY', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'BRILLIANT'];
 
-    protected $appends = ['online', 'age'];
+    protected $appends = ['online', 'age', 'vip'];
 
     /**
      * The attributes that are mass assignable.
@@ -115,18 +117,23 @@ class User extends Authenticatable
 
     public function feedbacks()
     {
-        return $this->hasMany(Feedback::class);
+        return $this->hasMany(Feedback::class, 'to_id');
     }
 
-    public function transactions()
+    public function reviews()
     {
-        return $this->hasMany(Transaction::class);
+        return $this->hasMany(Feedback::class, 'user_id');
     }
 
-    public function incomes()
-    {
-        return $this->hasMany(Transaction::class, 'id', 'to_id');
-    }
+//    public function transactions()
+//    {
+//        return $this->hasMany(Transaction::class);
+//    }
+//
+//    public function incomes()
+//    {
+//        return $this->hasMany(Transaction::class, 'id', 'to_id');
+//    }
 
     // Суммирует эмаунт ($user->status)
 //    public function getStatusAttribute()
@@ -153,5 +160,9 @@ class User extends Authenticatable
 
     public function getOnlineAttribute() {
         return Carbon::now()->diffInMinutes($this->last_online_at) <= 5;
+    }
+
+    public function getVipAttribute() {
+        return Carbon::now() <= $this->vip_until;
     }
 }

@@ -54,6 +54,7 @@ Vue.component('comment', require('./components/comment').default);
 Vue.component('comments', require('./components/Comments').default);
 Vue.component('text-publication', require('./components/TextPublication').default);
 Vue.component('women-list', require('./components/womenList').default);
+Vue.component('feedbacks', require('./components/feedbacks').default);
 
 
 
@@ -2893,6 +2894,10 @@ window.onload = function () {
 
         $('.profile-descrp__icon').on('click', function() {
             openPopUp('#modal-settings');
+        });
+
+        $('.make-feedback').on('click', function() {
+            openPopUp('#modal-review');
         });
 
         $('.btnReview').on('click', function() {

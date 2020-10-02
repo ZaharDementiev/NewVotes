@@ -1,6 +1,6 @@
 <template>
   <div class="wrap-topic">
-    <div class="settings-content-el">
+    <div :class="'settings-content-el '+ login_class()" onclick="preventDefault()">
       <div class="settings-content-el-top unselectable">
         <div class="settings-content-el-left">
           <div class="settings-content-el-left-icon">
@@ -14,7 +14,7 @@
           </div>
         </div>
       </div>
-      <div class="settings-content-el-body">
+      <div :class="non_auth_opening()">
         <form class="form-settigns-el" method="post" id="sortForm">
           <label class="wrap-radio__el radio-el form-settigns-el__el">
             <span class="radio-el__text">Online</span>
@@ -71,7 +71,7 @@
         </div>
         <div class="article-user__body">
           <a :href="'/user/' + woman.name" class="article-user__name">{{ woman.name + ' ' + woman.age}}</a>
-          <div class="article-user__info">Рейтинг: <span class="article-user__info_bold">{{ woman.rating }}</span></div>
+          <div class="article-user__info">Рейтинг123: <span class="article-user__info_bold">{{ woman.rating }}</span></div>
           <div class="article-user__info">Оценка: <span class="article-user__info_bold">4,5</span></div>
           <div class="rating">
             <div class="rating__el rating-el rating-el_active"></div>
@@ -84,7 +84,7 @@
       </div>
     </div>
     <div class="btn-green tapes-else">
-      <a href="#">Смотреть еще <img src="/img/tape/else_icon.svg" alt=""></a>
+      <a @click="loadWomen()">Смотреть еще <img src="/img/tape/else_icon.svg" alt=""></a>
     </div>
   </div>
 </template>
@@ -109,11 +109,28 @@ export default {
       })
     },
     vip_class(woman) {
+      let prefix = this.user ? "" : "signIn_open";
       if (woman.vip) {
-        return 'articles-users__el article-user article-user_vip';
+        return prefix + ' articles-users__el article-user article-user_vip';
       } else {
-        return 'articles-users__el article-user';
+        return prefix + ' articles-users__el article-user';
       }
+    },
+    login_class() {
+      return this.user ? "" : "signIn_open";
+    },
+    non_auth_opening() {
+      if (this.user) {
+        return 'settings-content-el-body'
+      } else {
+        return 'settings-content-el-body non-auth-opening';
+      }
+    },
+    loadWomen() {
+      let ids = this.women.map(woman => woman.id);
+      axios.post('/virt/load', {ids:ids}).then(resp => {
+        this.women = this.women.concat(resp.data);
+      })
     }
   }
 }

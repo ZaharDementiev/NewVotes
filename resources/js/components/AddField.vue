@@ -1,23 +1,4 @@
 <template>
-<!--    <div class="sample" style="display: none">-->
-<!--        <div class="form-group">-->
-<!--            <label>Добавить вариант ответа</label>-->
-<!--            <input type="button"-->
-<!--                   class="btn btn-primary"-->
-<!--                   value="+"-->
-<!--                   @click="addGuest"-->
-<!--            >-->
-<!--        </div>-->
-<!--        <div>-->
-<!--            <div class="form-group" v-for="(guest, index) in guests">-->
-<!--                <label @dblclick="deleteGuest(index)">-->
-<!--                    Вариант {{ index + 1 }}-->
-<!--                </label>-->
-<!--                <input type="text" name="options[]" class="form-control" v-model="guests[index]">-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-
 <div>
     <div class="publication-content-form-el" @click="showMe = !showMe">
 

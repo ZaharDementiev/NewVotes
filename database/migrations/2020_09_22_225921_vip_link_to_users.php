@@ -14,7 +14,7 @@ class VipLinkToUsers extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->boolean('vip')->default(false);
+            $table->timestamp('vip_until')->default(false);
             $table->string('link')->nullable();
         });
     }

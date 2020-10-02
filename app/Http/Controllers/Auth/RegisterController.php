@@ -69,7 +69,8 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'gender' => $data['sex'],
-            'birth' => Carbon::createFromDate($data['year'], $data['month'], $data['day'])
+            'birth' => Carbon::createFromDate($data['year'], $data['month'], $data['day']),
+            'vip_until' => Carbon::now()->addMonth(1)
         ]);
     }
 }
